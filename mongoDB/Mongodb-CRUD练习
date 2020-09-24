@@ -1,0 +1,202 @@
+#demo Entry
+{
+	"_id" : ObjectId("5f6bfd79e68ef51ae18fed9e"),
+	"name" : "Jessica",
+	"gender" : "f",
+	"age" : 22,
+	"birthdate" : {
+		"day" : 21,
+		"month" : 3,
+		"year" : 1998
+	},#nested Doc
+	"hobby" : [
+		"cooking",
+		"piano"
+	],#Array数组
+	"city" : "Shanghai",
+	"time" : [
+		10,
+		19
+	]#数组
+}
+
+1. 查找所有学生
+db.student.find().pretty()
+2.查找所有女学生
+db.student.find({gender:"f"}).pretty()
+3.查找城市在上海，杭州，成都之中的学生
+db.student.find({city:{$in:["Shanghai","Chengdu","Hangzhou"]}}).pretty()
+4.查找年龄小于24岁的女学生
+db.student.find({age:{$lt:24}},{gender:"f"}).pretty()#注意这种花括号和着写和分开写的不同
+db.student.find({age:{$lt:24},gender:"f"},{name:1}).pretty()
+5.查找城市在上海 或 年龄小于23岁的学生
+db.student.find({$or:[{city:"Shanghai"},{age:{$lt:23}}]},{name:1}).pretty()
+6.查找（城市在上海或者年龄大于21岁）的名字以J为开头的学生
+db.student.find({$and:{{$or:[{city:"Shanghai"},{age:{$gt:21}}]},{name:/^J/}}},{name:1})
+db.student.find({$and:{{$or:[{city:"Shanghai"},{age:{$gt:21}}]},{name:/^J/}}},{name:1})
+#这里不需要and
+db.student.find({
+    name:/^J/,
+    $or:[{city:"Shanghai"},{age:{$gt:23}}]
+})
+
+7.嵌入文档的查找 (c.f.数组的查找)
+db.student.find({"birthdate.year":1998},{name:1})
+此外：
+db.student.find({birthdate:{year:1998}},{name:1})
+上面那一行是要求的精确匹配。
+
+8.数组:array:[]; doc:{}
+db.student.find({hobby:"piano"},{name:1})
+
+9.喜欢摄影和烹饪的学生
+db.student.find({hobby:{"piano","photography"}},{name:1})
+db.student.find(
+    {hobby:["photography","cooking"]}
+)#这个表示hobby的值完全匹配
+db.student.find(
+    {hobby:{$all:["photography","cooking"]}},
+    {name:1}
+)
+
+10.查找开始工作时间在9点及0点以后的学生
+注意数组元素的标号从零开始
+db.student.find(
+    {"time.0":{$gte:9}},
+    {name:1}
+)
+
+11.查找time数组里面包含小于9且包含大于18的数字的学生
+db.student.find(
+    {time:[{$lt:9},{$gt:18}]}
+)#数组的逻辑不是方括号！
+db.student.find(
+    {time:{$lt:9,$gt:18}},
+    {name:1}
+)#匹配元素任意条件
+db.student.find(
+    {time:{{$lt:9},{$gt:18}}},
+    {name:1}
+)#这样也会报错
+
+12.查找time数组里面包含大于17且小于19
+db.student.find(
+    {time:{$gt:17,$lt:19}},
+    {name:1}
+)
+注意上面与这个对比
+db.student.find(
+    {time:{$elemMatch:{$gt:17,$lt:19}}},
+    {name:1}
+)
+注意这两个的对比:
+上面这个没有elemMatch的是针对这个数组整体的，数组里要有一个元素大于17，一个元素小于19，这两个元素可以是同一个.
+有elemMatch的话，需要找数组中某个元素同时满足两个条件的
+
+
+13.查找有3个爱好的学生
+db.student.find({hobby:{$size:3}},{name:1})
+
+
+---
+#Nested Doc and array
+及嵌入文档里套了数组
+#demo Entry{
+	"_id" : ObjectId("5f6c07dce68ef51ae18feda1"),
+	"name" : "Jace",
+	"students" : [
+		{
+			"name" : "Joe",
+			"age" : 23
+		},
+		{
+			"name" : "Jason",
+			"age" : 21
+		}
+	]
+}
+14.查找有学生年龄在22岁以下，且该学生名字开头为J的导师
+db.tutor.find({"students":{$elemMatch:{age:{$lt:22},name:/^J/}}},
+{name:1})#注意体会这里elemMatch的作用。
+
+注意下面语句与上面语句的对比：
+
+#数据库中有一个人满足两个条件或两个人分别满足一个条件就会被选择出来。
+db.tutor.find({"students":{age:{$lt:22},name:/^J/}}).pretty()
+
+现在数据库修改如下：
+db.tutor.insertMany( [
+{ name: "Jack", students:[ { name: "Joe", age: 23 }, { name: "Kate", age: 22} ] },
+{ name: "Max", students:[ { name: "Rose", age: 24 } ] },
+{ name: "Jace", students:[ { name: "Joe", age: 23 }, { name: "Jason", age: 21 } ] },
+])#insertMany要加方括号噢
+db.tutor.insertOne(
+{name: "Amy", students: [{name: "Joe", age: 23}, {name: "Katty", age: 21}]}
+)
+db.tutor.find().pretty()显示如下
+{
+	"_id" : ObjectId("5f6c07dce68ef51ae18fed9f"),
+	"name" : "Jack",
+	"students" : [
+		{
+			"name" : "Joe",
+			"age" : 23
+		},
+		{
+			"name" : "Kate",
+			"age" : 22
+		}
+	]
+}
+{
+	"_id" : ObjectId("5f6c07dce68ef51ae18feda0"),
+	"name" : "Max",
+	"students" : [
+		{
+			"name" : "Rose",
+			"age" : 24
+		}
+	]
+}
+{
+	"_id" : ObjectId("5f6c07dce68ef51ae18feda1"),
+	"name" : "Jace",
+	"students" : [
+		{
+			"name" : "Joe",
+			"age" : 23
+		},
+		{
+			"name" : "Jason",
+			"age" : 21
+		}
+	]
+}
+{
+	"_id" : ObjectId("5f6c1b42e68ef51ae18feda2"),
+	"name" : "Amy",
+	"students" : [
+		{
+			"name" : "Joe",
+			"age" : 23
+		},
+		{
+			"name" : "Katty",
+			"age" : 21
+		}
+	]
+}
+现在体会三个查询语句的区别：
+db.tutor.find({"students":{age:{$lt:22},name:/^J/}})【我自己打得】
+db.tutor.find({"students":{name:/^J/,age:{$lt:22}}})【我自己打得】
+db.tutor.find({"students":[{name:/^J/,"age":{$lt:24}},{"name" : "Katty","age" : 21}]})//没有精确匹配，查不出来。
+
+db.tutor.find( { "students.age": { $lt:22 }, "students.name": /^J/} )【这个是正确的，比较这个和之前那个的区别】
+db.tutor.find({"students":{$elemMatch:{age:{$lt:22},name:/^J/}}})
+
+----
+15.查找所有男生的名字
+db.student.find({gender:"m"},{name:1,_id:0})#注意这个默认有无id的位置
+
+16.查找所有男生除了生日和爱好之外的信息：
+db.student.find( { gender: "m" }, { birthdate: 0, hobby: 0 } )
