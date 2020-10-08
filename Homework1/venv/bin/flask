@@ -1,0 +1,8 @@
+#!/Users/chixinning/Desktop/大三上/当代数据库管理系统/上机/Contemporary-database-management-system/Homework1/venv/bin/python3
+# -*- coding: utf-8 -*-
+import re
+import sys
+from flask.cli import main
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
