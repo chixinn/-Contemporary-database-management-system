@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<ul>
+    <h1>大家伙都来的市场</h1>
+    <h2>{{info}}</h2>
+    <h3>您当前拥有{{user.money}}元</h3>
+    <tr> 
+        <th>物品名称</th> <th>物品等级</th>  
+        <th>物品类型</th><th>卖家</th>
+        <th>售价</th>
+    </tr>
+    {% for item in markets %}
+    <table>
+      
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.price}}</td>
+                <td>{{item.owner}}</td>
+                <td>{{item.type}}</td>
+                <td>{{item.level}}</td>
+            </tr>
+    </table>
+    {% endfor %}
+</ul>
+{% endblock %}

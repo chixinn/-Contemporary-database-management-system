@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<ul>
+    <h1>你查看了历史~</h1>
+    <tr> 
+        <th>用户名<th> <th>操作时间</th>  
+        <th>操作类型类型</th><th>细节</th>
+    </tr>
+    {% for item in history %}
+    <table>
+      
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.opt_time}}</td>
+                <td>{{item.opt_type}}</td>
+                <td>{{item.detail}}</td>
+            </tr>
+    </table>
+    <hr>
+    {% endfor %}
+</ul>
+{% endblock %}

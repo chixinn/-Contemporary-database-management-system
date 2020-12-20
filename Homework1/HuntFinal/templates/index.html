@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<ul>
+    {% for user in users %}
+    <li><p>
+        玩家姓名：
+        {{user.name}}
+    </li>
+    <li><p>
+        玩家的存储箱：<br>
+        <table>
+        <tr> <th>物品名称</th> <th>物品属性</th>  <th>物品类型</th></tr>
+        {% for item in user.box%}
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.level}}</td>
+                <td>{{item.type}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    </li>
+    <li><p>
+        玩家的随身携带：<br>
+        <table>
+        <tr> <th>物品名称</th> <th>物品属性</th>  <th>物品类型</th></tr>
+        {% for item in user.takeaway%}
+            <tr>
+                <td>{{item.name}}</td>
+                <td>{{item.level}}</td>
+                <td>{{item.type}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    </li>
+    <li><p>
+        玩家的金钱：
+        {{user.money}}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
